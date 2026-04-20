@@ -1,14 +1,14 @@
 class Disc < Formula
   desc "Disc command-line interface"
   homepage "https://github.com/disctech/disc-cli"
-  version "0.1.0"
+  version "0.1.1"
 
   if OS.mac? && Hardware::CPU.arm?
-    url "https://github.com/DiscTechnologies/disc-cli/releases/download/v0.1.0/disc-aarch64-apple-darwin.tar.gz"
-    sha256 "90f7aa3d02ef0995afad2929aa5bd47c27c22633ba91d9b165dcce0df174a89d"
+    url "https://github.com/DiscTechnologies/disc-cli/releases/download/v0.1.1/disc-aarch64-apple-darwin.tar.gz"
+    sha256 "ea6bf130898092ac7d6dc5b3ea7ab3c0daa9715d5d62e2ff057d1db5060ae65f"
   elsif OS.linux? && Hardware::CPU.intel?
-    url "https://github.com/DiscTechnologies/disc-cli/releases/download/v0.1.0/disc-x86_64-unknown-linux-gnu.tar.gz"
-    sha256 "790ba54cbc1241d16f2d33745e8be8efa892e0dfbfff5851a025f96df55cb5bf"
+    url "https://github.com/DiscTechnologies/disc-cli/releases/download/v0.1.1/disc-x86_64-unknown-linux-gnu.tar.gz"
+    sha256 "c6f304d191ee0a605c67f7684b4029e215172aaec38090ab3986a85e33d2f34c"
   else
     odie "Unsupported platform"
   end
