@@ -1,0 +1,61 @@
+name: release-policy
+
+on:
+  push:
+    tags:
+      - "**"
+  release:
+    types:
+      - published
+      - edited
+      - prereleased
+      - released
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    env:
+      RELEASE_NAME: ${{ github.event.release.name }}
+      RELEASE_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || github.ref_name }}
+    steps:
+      - name: Validate canonical release metadata
+        run: |
+          if [[ ! "${RELEASE_TAG}" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-rc\.[1-9][0-9]*)?$ ]]; then
+            echo "::error::Release tag must use vMAJOR.MINOR.PATCH or vMAJOR.MINOR.PATCH-rc.N"
+            exit 1
+          fi
+          if [[ "${{ github.event_name }}" == "release" && "${RELEASE_NAME}" != "${RELEASE_TAG}" ]]; then
+            echo "::error::GitHub Release title must exactly match its tag"
+            exit 1
+          fi
+
+  publish:
+    if: github.event_name == 'push' && github.repository != 'DiscTechnologies/disc-cli'
+    needs:
+      - validate
+    runs-on: ubuntu-24.04
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_TAG: ${{ github.ref_name }}
+    steps:
+      - name: Publish same-named GitHub Release
+        run: |
+          release_args=()
+          if [[ "${RELEASE_TAG}" == v0.* ]]; then
+            release_args+=(--prerelease)
+          fi
+          if gh release view "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
+            gh release edit "${RELEASE_TAG}" \
+              --repo "${GITHUB_REPOSITORY}" \
+              --title "${RELEASE_TAG}" \
+              "${release_args[@]}"
+          else
+            gh release create "${RELEASE_TAG}" \
+              --repo "${GITHUB_REPOSITORY}" \
+              --title "${RELEASE_TAG}" \
+              --generate-notes \
+              "${release_args[@]}"
+          fi
